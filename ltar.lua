@@ -1,3 +1,6 @@
+--- LUA support for TAR packages
+-- @module ltar
+
 local microtar = require("lmicrotar")
 local lfs = require("lfs")
 
@@ -72,6 +75,10 @@ local function read_tarfile_chunks(handle, fd, total_size)
     end
 end
 
+--- Create empty tar file
+-- @function create
+-- @param path where to put newly created tar file
+-- @return tar handle or nil
 function tar.create(path)
     Handle = { handle = microtar.open(path, "w"),
                add_file = function(self, filename)
@@ -91,6 +98,9 @@ function tar.create(path)
     return Handle
 end
 
+--- Iterate over contents of tar file
+-- @function iter_by_handle
+-- @param handle tar handle create by @{create}
 function tar.iter_by_handle (handle)
     return function()
         local f = handle:read_header()
@@ -101,6 +111,9 @@ function tar.iter_by_handle (handle)
     end
 end
 
+--- Iterate over contents of tar file
+-- @function iter_by_path
+-- @param path path to tar file
 function tar.iter_by_path (path)
     local handle = microtar.open(path)
     return function()
@@ -112,6 +125,10 @@ function tar.iter_by_path (path)
     end
 end
 
+--- Pack contents of specified dir to tar file
+-- @function create_from_path
+-- @param path directory 
+-- @param where where to save tar file 
 function tar.create_from_path(path, where)
     local handle = microtar.open(where, "w")
     for filename, attr in dirtree(path) do
@@ -127,6 +144,10 @@ function tar.create_from_path(path, where)
     handle:close()
 end
 
+--- Unpack tar file to specified directory
+-- @function unpack
+-- @param path directory 
+-- @param where where to store unpacked files 
 function tar.unpack(path, where)
     local handle = microtar.open(path)
     local header = handle:read_header()
@@ -144,6 +165,10 @@ function tar.unpack(path, where)
     handle:close()
 end
 
+--- Append directory to already existing tar file
+-- @function append
+-- @param path directory 
+-- @param where location of already existing tar file 
 function tar.append(path, where)
     local handle = microtar.open(where, "a")
     for filename, attr in dirtree(path) do
@@ -156,6 +181,19 @@ function tar.append(path, where)
             fd:close()
         end
     end
+    handle:close()
+end
+
+--- Append file to already existing tar file
+-- @function append_file
+-- @param path file path 
+-- @param where location of already existing tar file 
+function tar.append_file(path, where)
+    local handle = microtar.open(where, "a")
+    handle:write_file_header(filename, attr.size)
+    local fd = io.open(filename, "r")
+    write_tarfile_chunks(handle, fd)
+    fd:close()
     handle:close()
 end
 

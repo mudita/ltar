@@ -1,7 +1,7 @@
 package = "ltar"
 version = "1.0-1"
 source = {
-   url = "..." -- We don't have one yet
+    url = "https://github.com/mudita/ltar"
 }
 description = {
     summary = "tar library",
@@ -11,7 +11,7 @@ description = {
     license = "MIT"
 }
 dependencies = {
-    "lua >= 5.1, < 5.5",
+    "lua >= 5.1",
     "luafilesystem"
 }
 build = {
